@@ -1,0 +1,2 @@
+defmodule DuelArena do
+end

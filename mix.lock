@@ -1,0 +1,3 @@
+%{
+  "tabletop": {:hex, :tabletop, "1.0.1", "78e719727b0b2f8762d55f1ad9af0d915ace27a1cc39d240ebfb2b50cd20a7f1", [:mix], [], "hexpm", "da40a19750fb67ff8f5cc3c038a64ccf12a71267541743f327044a2a24394e80"},
+}
