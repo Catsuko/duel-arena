@@ -1,25 +1,37 @@
 defmodule DuelArena.ActionQueue do
   use GenServer
 
+  def new(game_server) do
+    {:ok, pid} = GenServer.start_link(DuelArena.ActionQueue, game_server)
+    pid
+  end
+
   def init(game_server) do
-    :timer.send_interval(1000, :tick)
+    :timer.send_interval(500, :tick)
     {:ok, {game_server, %{}}}
   end
 
-  def push(pid, position, actions) when is_list(actions) do
-    GenServer.cast(pid, {:push, position, actions})
+  def push(pid, piece_id, move) do
+    GenServer.cast(pid, {:push, piece_id, move})
     pid
   end
 
   def handle_info(:tick, {game_server, action_map}) do
-    GenServer.cast(game_server, {:take_turn, action_map})
-    {:noreply, {game_server, action_map}}
+    if Enum.any?(action_map) do
+      GenServer.cast(game_server, format_actions_into_turn(action_map))
+    end
+    {:noreply, {game_server, %{}}}
   end
 
-  def handle_cast({:push, position, actions}, {game_server, action_map}) when is_list(actions) do
-    total_actions = Map.get(action_map, position, []) ++ actions
-    updated_map = Map.put(action_map, position, Enum.take(total_actions, -5))
-    {:noreply, {game_server, updated_map}}
+  def handle_cast({:push, piece_id, move}, {game_server, action_map}) do
+    {:noreply, {game_server, Map.put(action_map, piece_id, move)}}
+  end
+
+  defp format_actions_into_turn(action_map) do
+    actions = Enum.map action_map, fn {piece_id, dir} ->
+      {:step, {piece_id, dir}}
+    end
+    {:take_turn, actions}
   end
 
 end
